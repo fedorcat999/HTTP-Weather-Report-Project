@@ -1,6 +1,0 @@
-{
-    "name": "weather-rest-api",
-    "version": "1.0.0",
-    "description": "REST API для передачі данних про погоду через HTTP протокол",
-    "main": "server.js"
-}
