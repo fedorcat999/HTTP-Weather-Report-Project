@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Українська погодна система</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: #0057b7; }
+        .main { display: flex; gap: 20px; }
+        .left-panel, .right-panel { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .left-panel { flex: 1; }
+        .right-panel { flex: 2; }
+        .city-btn { 
+            display: block; 
+            width: 100%; 
+            padding: 10px; 
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .city-btn.active { background: #0057b7; color: white; }
+        .weather-display { margin: 20px 0; }
+        .weather-info div { margin: 10px 0; }
+        .controls button { 
+            padding: 10px 20px; 
+            margin-right: 10px;
+            background: #0057b7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-box { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌤️ Українська погодна система</h1>
+            <p>Моніторинг погоди в Україні v3.2</p>
+        </header>
+        
+        <div class="main">
+            <div class="left-panel">
+                <input type="text" class="search-box" placeholder="🔍 Пошук міста...">
+                <div id="city-buttons"></div>
+            </div>
+            
+            <div class="right-panel">
+                <div id="weather-display" class="weather-display">
+                    <h2 id="city-name">Обирайте місто</h2>
+                    <div class="weather-info">
+                        <div>🌡️ Температура: <span id="temperature">--</span>°C</div>
+                        <div>💨 Вітер: <span id="wind">--</span> м/с</div>
+                        <div>💧 Вологість: <span id="humidity">--</span>%</div>
+                        <div>📊 Тиск: <span id="pressure">--</span> гПа</div>
+                        <div>👁️ Видимість: <span id="visibility">--</span> км</div>
+                        <div>📝 Опис: <span id="description">--</span></div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="refresh-btn">🔄 Оновити</button>
+                    <button id="auto-update-btn">⏰ Автооновлення</button>
+                    <button id="export-btn">📥 Експорт</button>
+                </div>
+                
+                <div id="message" style="margin-top:20px;"></div>
+                <div id="server-status" style="margin-top:20px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Дані про міста України
+        const allUkraineCities = {
+            kyiv: { name: "Київ", temperature: 18, wind: 4.2, humidity: 75, pressure: 1013, visibility: 10, description: "Хмарно" },
+            lviv: { name: "Львів", temperature: 15, wind: 3.5, humidity: 70, pressure: 1015, visibility: 8, description: "Невеликий дощ" },
+            odesa: { name: "Одеса", temperature: 22, wind: 5.5, humidity: 65, pressure: 1012, visibility: 15, description: "Сонячно" },
+            kharkiv: { name: "Харків", temperature: 14, wind: 2.5, humidity: 60, pressure: 1010, visibility: 12, description: "Хмарно" }
+        };
+        
+        let currentCity = 'kyiv';
+        
+        function updateCityWeather(cityId) {
+            const city = allUkraineCities[cityId];
+            if (!city) return;
+            
+            document.getElementById('city-name').textContent = city.name;
+            document.getElementById('temperature').textContent = city.temperature;
+            document.getElementById('wind').textContent = city.wind;
+            document.getElementById('humidity').textContent = city.humidity;
+            document.getElementById('pressure').textContent = city.pressure;
+            document.getElementById('visibility').textContent = city.visibility;
+            document.getElementById('description').textContent = city.description;
+        }
+        
+        function createCityButtons() {
+            const container = document.getElementById('city-buttons');
+            container.innerHTML = '';
+            
+            Object.keys(allUkraineCities).forEach(cityId => {
+                const city = allUkraineCities[cityId];
+                const button = document.createElement('button');
+                button.className = `city-btn ${cityId === currentCity ? 'active' : ''}`;
+                button.setAttribute('data-city', cityId);
+                button.textContent = city.name;
+                
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.city-btn').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCity = this.getAttribute('data-city');
+                    updateCityWeather(currentCity);
+                    showMessage(`Обрано місто: ${city.name}`);
+                });
+                
+                container.appendChild(button);
+            });
+        }
+        
+        function showMessage(text) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            setTimeout(() => messageDiv.style.display = 'none', 3000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            createCityButtons();
+            updateCityWeather(currentCity);
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                updateCityWeather(currentCity);
+                showMessage('Дані оновлено!');
+            });
+        });
+    </script>
+</body>
+</html>
